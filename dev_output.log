@@ -1,0 +1,282 @@
+
+> vault@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+✓ Ready in 518ms
+
+○ Compiling / ...
+ GET / 200 in 4.4s (next.js: 4.1s, application-code: 356ms)
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 3.115218
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
+ GET /api/search?q=report 500 in 7.1s (next.js: 6ms, application-code: 7.1s)
+[browser] Error: Search failed
+    at performSearch (app/page.tsx:23:26)
+  21 |
+  22 |       const res = await fetch(`/api/search?${params.toString()}`);
+> 23 |       if (!res.ok) throw new Error('Search failed');
+     |                          ^
+  24 |       const data = await res.json();
+  25 |       setResults(data.hits || []);
+  26 |     } catch (error) { (app/page.tsx:27:15)
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 3.284025
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
+ GET /api/search?q=report&tags=Finance 500 in 6.9s (next.js: 4ms, application-code: 6.9s)
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 2.769132
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
+ GET /api/search? 500 in 11.0s (next.js: 2.1s, application-code: 8.9s)
+[browser] Error: Search failed
+    at performSearch (app/page.tsx:23:26)
+  21 |
+  22 |       const res = await fetch(`/api/search?${params.toString()}`);
+> 23 |       if (!res.ok) throw new Error('Search failed');
+     |                          ^
+  24 |       const data = await res.json();
+  25 |       setResults(data.hits || []);
+  26 |     } catch (error) { (app/page.tsx:27:15)
+[browser] Error: Search failed
+    at performSearch (app/page.tsx:23:26)
+  21 |
+  22 |       const res = await fetch(`/api/search?${params.toString()}`);
+> 23 |       if (!res.ok) throw new Error('Search failed');
+     |                          ^
+  24 |       const data = await res.json();
+  25 |       setResults(data.hits || []);
+  26 |     } catch (error) { (app/page.tsx:27:15)
+ GET / 200 in 82ms (next.js: 5ms, application-code: 77ms)
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 3.141119
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
+ GET /api/search? 500 in 6.8s (next.js: 3ms, application-code: 6.8s)
+[browser] Error: Search failed
+    at performSearch (app/page.tsx:23:26)
+  21 |
+  22 |       const res = await fetch(`/api/search?${params.toString()}`);
+> 23 |       if (!res.ok) throw new Error('Search failed');
+     |                          ^
+  24 |       const data = await res.json();
+  25 |       setResults(data.hits || []);
+  26 |     } catch (error) { (app/page.tsx:27:15)
+ GET /api/search?q=report 200 in 6.1s (next.js: 3ms, application-code: 6.1s)
+ GET /api/search?q=report&tags=Finance 200 in 5.0s (next.js: 3ms, application-code: 5.0s)
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 2.985522
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
+Elasticsearch search error: Error [ConnectionError]: connection failed (http://localhost:9200/)
+    at async GET (app/api/search/route.ts:46:20)
+  44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+  45 |     // Query, highlight etc are passed directly.
+> 46 |     const result = await client.search({
+     |                    ^
+  47 |       index: 'vault-documents',
+  48 |       query: {
+  49 |         bool: { {
+  options: { redaction: { type: 'replace', additionalKeys: [] } },
+  meta: {
+    body: undefined,
+    statusCode: 0,
+    headers: {},
+    meta: {
+      context: null,
+      request: [Object],
+      name: 'elasticsearch-js',
+      connection: [Object],
+      attempts: 3,
+      aborted: false,
+      duration: 3.174185
+    },
+    warnings: null
+  },
+  [cause]: Error [ConnectionError]:
+      at async GET (app/api/search/route.ts:46:20)
+    44 |     // In newer Elasticsearch JS clients, the "body" wrapper isn't needed.
+    45 |     // Query, highlight etc are passed directly.
+  > 46 |     const result = await client.search({
+       |                    ^
+    47 |       index: 'vault-documents',
+    48 |       query: {
+    49 |         bool: { {
+    options: { redaction: [Object] },
+    meta: undefined
+  }
+}
