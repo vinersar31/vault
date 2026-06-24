@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Firebase Storage security rules for Vault.
+// Files are private to their owner and capped at 25 MB. Deploy with:
+//   firebase deploy --only storage
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /users/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.size < 25 * 1024 * 1024;
+    }
+  }
+}

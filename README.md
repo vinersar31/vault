@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vault — Personal Document Archive
 
-## Getting Started
+A private, searchable archive for your important documents (house, car, and
+anything else). Upload files with a category, tags, and notes; browse a
+date-sorted history; and find anything instantly with in-browser search.
 
-First, run the development server:
+Built to run **fully client-side** so it can be hosted for free on **GitHub
+Pages**:
+
+- **Next.js 16** (App Router, static export) + **React 19** + **Tailwind CSS v4**
+- **Firebase** — Authentication (Google), Firestore (metadata), Storage (files)
+- **MiniSearch** — fast fuzzy search over titles, categories, tags, and notes
+
+## Features
+
+- Google sign-in; every document is private to you (enforced by security rules)
+- Upload documents with a **category**, **tags**, and **notes**
+- **User-editable categories** (seeded with House, Car, Others)
+- Instant client-side search with typo tolerance and prefix matching
+- Filter by category and tags; newest-first history
+- Edit metadata, download, and delete documents
+
+## Prerequisites
+
+- Node.js 20+
+- A Firebase project (the **Blaze** pay-as-you-go plan is required to use
+  Firebase Storage; the free tier quota still applies for personal use)
+
+## 1. Configure Firebase
+
+1. Create a project at the [Firebase console](https://console.firebase.google.com/).
+2. **Authentication → Sign-in method →** enable **Google**.
+3. **Firestore Database →** create a database (production mode).
+4. **Storage →** get started (requires the Blaze plan).
+5. **Project settings → General → Your apps →** add a **Web app** and copy the
+   config values.
+6. Deploy the security rules from this repo:
+   ```bash
+   firebase deploy --only firestore:rules,storage
+   ```
+   (or paste [`firestore.rules`](firestore.rules) and [`storage.rules`](storage.rules)
+   into the console).
+
+## 2. Set environment variables
+
+Copy [`.env.example`](.env.example) to `.env.local` and fill in your Firebase
+web config:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=...
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+NEXT_PUBLIC_FIREBASE_APP_ID=...
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> These values are shipped to the browser by design. Access is secured by
+> Firebase Auth and the security rules, not by hiding the config.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Run locally
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000) and sign in.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. Deploy to GitHub Pages
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The workflow at [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+builds the static export and publishes it on every push to `main`.
 
-## Deploy on Vercel
+1. **Repository → Settings → Pages → Build and deployment → Source:** select
+   **GitHub Actions**.
+2. **Repository → Settings → Secrets and variables → Actions →** add each
+   `NEXT_PUBLIC_FIREBASE_*` value as a secret (same names as above).
+3. In the **Firebase console → Authentication → Settings → Authorized domains**,
+   add your Pages domain (e.g. `your-username.github.io`) so Google sign-in works.
+4. Push to `main`. The site deploys to
+   `https://<your-username>.github.io/<repo>/`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The base path is set automatically from the GitHub Pages action, so the app
+works whether it is served from a sub-path or a custom domain.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Production build (local)
+
+```bash
+npm run build   # outputs the static site to ./out
+```
+
