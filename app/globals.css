@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+ * Vault design system — dark, premium archive aesthetic.
+ * Tailwind v4 CSS-first config: theme tokens live in @theme.
+ */
+@theme {
+  --color-ink-950: #070b14;
+  --color-ink-900: #0b1120;
+  --color-ink-850: #0f1729;
+  --color-ink-800: #131c31;
+  --color-ink-700: #1c2742;
+
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 32px -12px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 0 1px rgba(56, 189, 248, 0.25),
+    0 14px 40px -14px rgba(56, 189, 248, 0.45);
+
+  --animate-fade-in-up: fade-in-up 0.4s ease-out both;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+:root {
+  color-scheme: dark;
+}
+
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-ink-950);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(60rem 60rem at 85% -10%, rgba(56, 189, 248, 0.14), transparent 60%),
+    radial-gradient(48rem 48rem at -10% 0%, rgba(129, 140, 248, 0.1), transparent 55%);
+  background-attachment: fixed;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::selection {
+  background: rgba(56, 189, 248, 0.3);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-white/5 bg-ink-900/70 shadow-card backdrop-blur-sm;
+  }
+  .stat-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .input {
+    @apply w-full rounded-xl border border-white/10 bg-ink-850 px-3.5 py-2.5 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-brand-500/60 focus:ring-1 focus:ring-brand-500/40;
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-medium text-slate-400;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-brand-400 to-indigo-400 px-4 py-2.5 text-sm font-semibold text-ink-950 shadow-glow transition-transform hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-ink-850 px-3.5 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-ink-800 hover:text-white;
+  }
+  .icon-btn {
+    @apply flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-ink-850 text-slate-400 transition-colors hover:bg-ink-800 hover:text-white;
+  }
+  .chip {
+    @apply rounded-full border border-white/10 bg-ink-850 px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:text-slate-200;
+  }
+  .chip-active {
+    @apply border-transparent bg-brand-500/15 text-brand-300;
+  }
 }
