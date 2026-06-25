@@ -1,17 +1,13 @@
 "use client";
 
-import { Calendar, Download, FileText, Pencil, Trash2 } from "lucide-react";
+import { Download, Eye, FileText, Pencil, Trash2 } from "lucide-react";
 import type { DocumentMeta } from "@/lib/types";
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+import { fileKind, formatBytes, KIND_COLOR, relativeTime } from "@/lib/files";
 
 interface DocumentCardProps {
   document: DocumentMeta;
   categoryName: string | null;
+  onPreview: (document: DocumentMeta) => void;
   onEdit: (document: DocumentMeta) => void;
   onDelete: (document: DocumentMeta) => void;
 }
@@ -19,72 +15,97 @@ interface DocumentCardProps {
 export default function DocumentCard({
   document,
   categoryName,
+  onPreview,
   onEdit,
   onDelete,
 }: DocumentCardProps) {
+  const kind = fileKind(document.fileType, document.fileName);
+  const color = KIND_COLOR[kind];
+
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 hover:shadow-md transition-shadow flex flex-col">
-      <div className="flex justify-between items-start gap-3 mb-3">
-        <h3 className="font-semibold text-lg text-slate-900 line-clamp-2">
-          {document.title || "Untitled Document"}
-        </h3>
-        <span className="flex items-center text-xs text-slate-400 gap-1 shrink-0 mt-1">
-          <Calendar size={12} />
-          {new Date(document.createdAt).toLocaleDateString()}
-        </span>
+    <div className="card group flex flex-col p-5 transition-colors hover:border-white/10">
+      <div className="flex items-start gap-3">
+        <button
+          onClick={() => onPreview(document)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+          style={{ backgroundColor: `${color}1f` }}
+          title="Preview"
+        >
+          <FileText size={18} style={{ color }} />
+        </button>
+        <div className="min-w-0 flex-1">
+          <button
+            onClick={() => onPreview(document)}
+            className="block w-full truncate text-left font-semibold text-slate-100 transition-colors group-hover:text-white"
+          >
+            {document.title || "Untitled document"}
+          </button>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Added {relativeTime(document.createdAt)}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 mb-3">
-        {categoryName && (
-          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded text-xs font-medium">
-            {categoryName}
-          </span>
-        )}
-        {document.tags.map((tag) => (
-          <span
-            key={tag}
-            className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-xs font-medium"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {(categoryName || document.tags.length > 0) && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {categoryName && (
+            <span className="rounded-md border border-brand-500/20 bg-brand-500/10 px-2 py-0.5 text-xs font-medium text-brand-300">
+              {categoryName}
+            </span>
+          )}
+          {document.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-md bg-white/5 px-2 py-0.5 text-xs font-medium text-slate-400"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {document.notes && (
-        <p className="text-sm text-slate-600 leading-relaxed line-clamp-2 mb-4">
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-400">
           {document.notes}
         </p>
       )}
 
-      <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 text-xs text-slate-400 min-w-0">
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-white/5 pt-3">
+        <span className="flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
           <FileText size={14} className="shrink-0" />
           <span className="truncate">{document.fileName}</span>
           <span className="shrink-0">· {formatBytes(document.fileSize)}</span>
         </span>
 
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={() => onPreview(document)}
+            title="Preview"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-brand-300"
+          >
+            <Eye size={16} />
+          </button>
           <a
             href={document.downloadURL}
             target="_blank"
             rel="noreferrer"
             download={document.fileName}
             title="Download"
-            className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-brand-300"
           >
             <Download size={16} />
           </a>
           <button
             onClick={() => onEdit(document)}
             title="Edit"
-            className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-white/5 hover:text-white focus:opacity-100 group-hover:opacity-100"
           >
             <Pencil size={16} />
           </button>
           <button
             onClick={() => onDelete(document)}
             title="Delete"
-            className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="rounded-lg p-1.5 text-slate-400 opacity-0 transition-all hover:bg-rose-500/15 hover:text-rose-300 focus:opacity-100 group-hover:opacity-100"
           >
             <Trash2 size={16} />
           </button>

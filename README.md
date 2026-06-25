@@ -13,12 +13,13 @@ Pages**:
 
 ## Features
 
+- Polished **dark UI** with inline **file preview** (images & PDFs) and download
 - Google sign-in; every document is private to you (enforced by security rules)
 - Upload documents with a **category**, **tags**, and **notes**
 - **User-editable categories** (seeded with House, Car, Others)
 - Instant client-side search with typo tolerance and prefix matching
-- Filter by category and tags; newest-first history
-- Edit metadata, download, and delete documents
+- Filter by category, tags, and **file type**; **sort** by date, title, or size
+- Date-sorted history; edit metadata, preview, download, and delete documents
 
 ## Prerequisites
 

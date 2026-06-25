@@ -5,8 +5,31 @@
 // itself once authenticated.
 
 import { useState } from "react";
-import { FileText, Loader2, LogIn, ShieldCheck } from "lucide-react";
+import { FileText, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden width="18" height="18">
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.15-4.53H2.18v2.84A11 11 0 0 0 12 23Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.85 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.67-2.84Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.67 2.84C6.71 7.3 9.14 5.38 12 5.38Z"
+      />
+    </svg>
+  );
+}
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const { user, loading, signIn } = useAuth();
@@ -15,8 +38,8 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="animate-spin text-blue-600" size={32} />
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="animate-spin text-brand-400" size={32} />
       </div>
     );
   }
@@ -41,36 +64,36 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 p-8 text-center">
-        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <FileText className="text-white" size={28} />
+    <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="card w-full max-w-sm animate-fade-in-up p-8 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-400 to-indigo-400 shadow-glow">
+          <FileText className="text-ink-950" size={26} strokeWidth={2.4} />
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Vault</h1>
-        <p className="mt-2 text-slate-500">
+        <h1 className="mt-5 text-2xl font-bold tracking-tight text-white">Vault</h1>
+        <p className="mt-1 text-sm text-slate-400">
           Your private document archive. Sign in to continue.
         </p>
 
         <button
           onClick={handleSignIn}
           disabled={signingIn}
-          className="mt-6 w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-medium px-4 py-3 rounded-xl transition-colors"
+          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
         >
           {signingIn ? (
             <Loader2 className="animate-spin" size={18} />
           ) : (
-            <LogIn size={18} />
+            <GoogleIcon />
           )}
           <span>Continue with Google</span>
         </button>
 
         {error && (
-          <p className="mt-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+          <p className="mt-4 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
             {error}
           </p>
         )}
 
-        <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+        <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500">
           <ShieldCheck size={14} />
           Only you can see your documents.
         </p>

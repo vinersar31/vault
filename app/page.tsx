@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowDownWideNarrow,
   FileText,
   FolderCog,
   Loader2,
@@ -14,12 +15,25 @@ import { useAuth } from "@/lib/auth";
 import AuthGate from "@/components/AuthGate";
 import UploadDocument from "@/components/UploadDocument";
 import DocumentCard from "@/components/DocumentCard";
+import DocumentPreview from "@/components/DocumentPreview";
 import EditDocument from "@/components/EditDocument";
 import CategoryManager from "@/components/CategoryManager";
 import { ensureDefaultCategories, subscribeCategories } from "@/lib/categories";
 import { deleteDocument, subscribeDocuments } from "@/lib/documents";
 import { buildSearchIndex, searchDocumentIds } from "@/lib/search";
+import { fileKind, formatBytes, KIND_LABEL, type FileKind } from "@/lib/files";
 import type { Category, DocumentMeta } from "@/lib/types";
+
+type SortKey = "newest" | "oldest" | "title" | "largest";
+
+const KIND_ORDER: FileKind[] = ["image", "pdf", "doc", "sheet", "text", "other"];
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "title", label: "Title A–Z" },
+  { value: "largest", label: "Largest first" },
+];
 
 function VaultApp() {
   const { user, signOutUser } = useAuth();
@@ -31,7 +45,10 @@ function VaultApp() {
   const [query, setQuery] = useState("");
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [activeKind, setActiveKind] = useState<FileKind | null>(null);
+  const [sort, setSort] = useState<SortKey>("newest");
 
+  const [previewing, setPreviewing] = useState<DocumentMeta | null>(null);
   const [editing, setEditing] = useState<DocumentMeta | null>(null);
   const [managingCategories, setManagingCategories] = useState(false);
 
@@ -76,6 +93,17 @@ function VaultApp() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [documents]);
 
+  const kindsPresent = useMemo(() => {
+    const set = new Set<FileKind>();
+    documents.forEach((d) => set.add(fileKind(d.fileType, d.fileName)));
+    return KIND_ORDER.filter((k) => set.has(k));
+  }, [documents]);
+
+  const totalSize = useMemo(
+    () => documents.reduce((sum, d) => sum + d.fileSize, 0),
+    [documents]
+  );
+
   const results = useMemo(() => {
     let list: DocumentMeta[];
     const trimmed = query.trim();
@@ -92,7 +120,9 @@ function VaultApp() {
     if (activeCategoryId) {
       list = list.filter((doc) => doc.categoryId === activeCategoryId);
     }
-
+    if (activeKind) {
+      list = list.filter((doc) => fileKind(doc.fileType, doc.fileName) === activeKind);
+    }
     if (activeTags.length > 0) {
       const lowered = activeTags.map((tag) => tag.toLowerCase());
       list = list.filter((doc) => {
@@ -101,19 +131,35 @@ function VaultApp() {
       });
     }
 
-    return list;
-  }, [query, documents, searchIndex, activeCategoryId, activeTags]);
+    const sorted = [...list];
+    switch (sort) {
+      case "oldest":
+        sorted.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      case "title":
+        sorted.sort((a, b) =>
+          (a.title || a.fileName).localeCompare(b.title || b.fileName)
+        );
+        break;
+      case "largest":
+        sorted.sort((a, b) => b.fileSize - a.fileSize);
+        break;
+      default:
+        sorted.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    return sorted;
+  }, [query, documents, searchIndex, activeCategoryId, activeKind, activeTags, sort]);
 
-  const toggleTag = (tag: string) => {
+  const toggleTag = (tag: string) =>
     setActiveTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
-  };
 
   const clearFilters = () => {
     setQuery("");
     setActiveCategoryId(null);
     setActiveTags([]);
+    setActiveKind(null);
   };
 
   const handleDelete = async (document: DocumentMeta) => {
@@ -129,7 +175,10 @@ function VaultApp() {
   };
 
   const hasFilters =
-    Boolean(query.trim()) || activeCategoryId !== null || activeTags.length > 0;
+    Boolean(query.trim()) ||
+    activeCategoryId !== null ||
+    activeTags.length > 0 ||
+    activeKind !== null;
 
   const userInitial = (
     user?.displayName?.[0] ||
@@ -138,21 +187,26 @@ function VaultApp() {
   ).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <FileText className="text-white" size={18} />
+      <header className="sticky top-0 z-20 border-b border-white/5 bg-ink-950/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-indigo-400 shadow-glow">
+              <FileText className="text-ink-950" size={20} strokeWidth={2.4} />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">Vault</h1>
+            <div>
+              <h1 className="text-lg font-bold tracking-tight text-white">Vault</h1>
+              <p className="hidden text-xs text-slate-500 sm:block">
+                Private document archive
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setManagingCategories(true)}
-              className="flex items-center gap-2 text-slate-600 hover:bg-slate-100 px-3 py-2 rounded-lg transition-colors"
+              className="btn-ghost"
               title="Manage categories"
             >
               <FolderCog size={18} />
@@ -161,9 +215,9 @@ function VaultApp() {
 
             <UploadDocument categories={categories} />
 
-            <div className="flex items-center gap-2 pl-2 ml-1 border-l border-slate-200">
+            <div className="ml-1 flex items-center gap-2 border-l border-white/10 pl-2">
               <div
-                className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-sm font-semibold"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500/15 text-sm font-semibold text-brand-300"
                 title={user?.email ?? undefined}
               >
                 {userInitial}
@@ -171,7 +225,7 @@ function VaultApp() {
               <button
                 onClick={() => signOutUser()}
                 title="Sign out"
-                className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
               >
                 <LogOut size={18} />
               </button>
@@ -180,49 +234,83 @@ function VaultApp() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        {/* Summary */}
+        <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-400">
+          <span className="font-semibold text-slate-200 tabular">
+            {documents.length}
+          </span>
+          documents
+          <span className="text-slate-600">·</span>
+          <span className="tabular">{formatBytes(totalSize)}</span>
+          <span className="text-slate-600">·</span>
+          <span className="tabular">{categories.length}</span>
+          categories
+        </div>
+
         {/* Search */}
-        <div className="relative mb-6">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="text-slate-400" size={24} />
-          </div>
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+            size={20}
+          />
           <input
             type="text"
-            className="block w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-lg shadow-sm focus:ring-4 focus:ring-blue-50 focus:border-blue-500 focus:outline-none transition-all placeholder:text-slate-400"
+            className="w-full rounded-2xl border border-white/10 bg-ink-900/70 py-4 pl-12 pr-4 text-base text-slate-100 shadow-card outline-none transition placeholder:text-slate-500 focus:border-brand-500/60 focus:ring-2 focus:ring-brand-500/30"
             placeholder="Search by title, category, tag, or notes…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
 
-        {/* Category filters */}
-        {categories.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            <button
-              onClick={() => setActiveCategoryId(null)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeCategoryId === null
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-              }`}
+        {/* Category filters + sort */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setActiveCategoryId(null)}
+            className={`chip ${activeCategoryId === null ? "chip-active" : ""}`}
+          >
+            All
+          </button>
+          {categories.map((category) => {
+            const selected = activeCategoryId === category.id;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategoryId(selected ? null : category.id)}
+                className={`chip ${selected ? "chip-active" : ""}`}
+              >
+                {category.name}
+              </button>
+            );
+          })}
+          <div className="ml-auto flex items-center gap-1.5 text-slate-400">
+            <ArrowDownWideNarrow size={15} />
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="rounded-lg border border-white/10 bg-ink-850 px-2.5 py-1.5 text-xs text-slate-300 outline-none focus:border-brand-500/60"
             >
-              All
-            </button>
-            {categories.map((category) => {
-              const isSelected = activeCategoryId === category.id;
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value} className="bg-ink-850">
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* File-type filters */}
+        {kindsPresent.length > 1 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {kindsPresent.map((k) => {
+              const selected = activeKind === k;
               return (
                 <button
-                  key={category.id}
-                  onClick={() =>
-                    setActiveCategoryId(isSelected ? null : category.id)
-                  }
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                    isSelected
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
+                  key={k}
+                  onClick={() => setActiveKind(selected ? null : k)}
+                  className={`chip ${selected ? "chip-active" : ""}`}
                 >
-                  {category.name}
+                  {KIND_LABEL[k]}
                 </button>
               );
             })}
@@ -231,22 +319,18 @@ function VaultApp() {
 
         {/* Tag filters */}
         {allTags.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <TagIcon size={14} /> Filter by tags
+          <div className="mt-5">
+            <h2 className="stat-label mb-2 flex items-center gap-1.5">
+              <TagIcon size={13} /> Tags
             </h2>
             <div className="flex flex-wrap gap-2">
               {allTags.map((tag) => {
-                const isSelected = activeTags.includes(tag);
+                const selected = activeTags.includes(tag);
                 return (
                   <button
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                      isSelected
-                        ? "bg-blue-600 text-white shadow-sm"
-                        : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                    }`}
+                    className={`chip ${selected ? "chip-active" : ""}`}
                   >
                     {tag}
                   </button>
@@ -257,18 +341,18 @@ function VaultApp() {
         )}
 
         {/* Results header */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-slate-800">
+        <div className="mb-4 mt-6 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-slate-200">
             {!loaded
               ? "Loading…"
               : hasFilters
                 ? `Results (${results.length})`
-                : `All Documents (${results.length})`}
+                : `All documents (${results.length})`}
           </h2>
           {hasFilters && (
             <button
               onClick={clearFilters}
-              className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800 transition-colors"
+              className="flex items-center gap-1 text-sm text-slate-500 transition-colors hover:text-slate-200"
             >
               <X size={14} /> Clear
             </button>
@@ -277,8 +361,8 @@ function VaultApp() {
 
         {/* Results */}
         {!loaded ? (
-          <div className="py-16 flex justify-center">
-            <Loader2 className="animate-spin text-blue-600" size={28} />
+          <div className="flex justify-center py-16">
+            <Loader2 className="animate-spin text-brand-400" size={28} />
           </div>
         ) : results.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
@@ -291,14 +375,15 @@ function VaultApp() {
                     ? categoryNameById.get(document.categoryId) ?? null
                     : null
                 }
+                onPreview={setPreviewing}
                 onEdit={setEditing}
                 onDelete={handleDelete}
               />
             ))}
           </div>
         ) : (
-          <div className="py-12 text-center text-slate-500 bg-white border border-slate-200 rounded-xl border-dashed">
-            <FileText className="mx-auto text-slate-300 mb-3" size={32} />
+          <div className="card border-dashed py-12 text-center text-slate-400">
+            <FileText className="mx-auto mb-3 text-slate-600" size={32} />
             {documents.length === 0 ? (
               <p>Your archive is empty. Upload your first document to get started.</p>
             ) : (
@@ -307,6 +392,13 @@ function VaultApp() {
           </div>
         )}
       </main>
+
+      {previewing && (
+        <DocumentPreview
+          document={previewing}
+          onClose={() => setPreviewing(null)}
+        />
+      )}
 
       {editing && (
         <EditDocument

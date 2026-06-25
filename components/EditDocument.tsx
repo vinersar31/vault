@@ -44,44 +44,44 @@ export default function EditDocument({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden text-slate-800">
-        <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
-          <h3 className="font-semibold text-lg">Edit Document</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+      <div className="card relative z-10 w-full max-w-md animate-fade-in-up overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <h3 className="text-base font-semibold text-white">Edit document</h3>
+          <button onClick={onClose} className="icon-btn h-8 w-8">
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 p-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Document Title
-            </label>
+            <label className="label">Document title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="input"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Category
-            </label>
+            <label className="label">Category</label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="input"
             >
-              <option value="">Uncategorized</option>
+              <option value="" className="bg-ink-850">
+                Uncategorized
+              </option>
               {categories.map((category) => (
-                <option key={category.id} value={category.id}>
+                <option key={category.id} value={category.id} className="bg-ink-850">
                   {category.name}
                 </option>
               ))}
@@ -89,52 +89,46 @@ export default function EditDocument({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Tags (comma-separated)
+            <label className="label">
+              Tags <span className="text-slate-600">(comma-separated)</span>
             </label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="input"
               placeholder="e.g. lease, rental, 2024"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              Notes
-            </label>
+            <label className="label">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="input resize-none"
               placeholder="Optional description to help you find this later"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+            <p className="rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
               {error}
             </p>
           )}
 
-          <div className="pt-2 flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5"
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg transition-colors"
-            >
+            <button type="submit" disabled={saving} className="btn-primary">
               {saving && <Loader2 size={16} className="animate-spin" />}
-              {saving ? "Saving…" : "Save Changes"}
+              {saving ? "Saving…" : "Save changes"}
             </button>
           </div>
         </form>

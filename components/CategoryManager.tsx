@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Check, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import {
   addCategory,
@@ -50,13 +50,13 @@ function CategoryRow({ category }: { category: Category }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
-            className="flex-1 px-2 py-1 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input flex-1 py-1.5"
           />
           <button
             onClick={save}
             disabled={busy}
             title="Save"
-            className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg disabled:opacity-60"
+            className="rounded-lg p-1.5 text-brand-300 transition-colors hover:bg-brand-500/15 disabled:opacity-60"
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
           </button>
@@ -66,18 +66,18 @@ function CategoryRow({ category }: { category: Category }) {
               setEditing(false);
             }}
             title="Cancel"
-            className="p-1.5 text-slate-400 hover:bg-slate-100 rounded-lg"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5"
           >
             <X size={16} />
           </button>
         </>
       ) : (
         <>
-          <span className="flex-1 text-slate-800">{category.name}</span>
+          <span className="flex-1 truncate text-slate-200">{category.name}</span>
           <button
             onClick={() => setEditing(true)}
             title="Rename"
-            className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
           >
             <Pencil size={16} />
           </button>
@@ -85,7 +85,7 @@ function CategoryRow({ category }: { category: Category }) {
             onClick={remove}
             disabled={busy}
             title="Delete"
-            className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg disabled:opacity-60"
+            className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-rose-500/15 hover:text-rose-300 disabled:opacity-60"
           >
             {busy ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
           </button>
@@ -109,7 +109,7 @@ export default function CategoryManager({
   const [newName, setNewName] = useState("");
   const [adding, setAdding] = useState(false);
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleAdd = async (e: FormEvent) => {
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
@@ -123,30 +123,32 @@ export default function CategoryManager({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden text-slate-800">
-        <div className="flex justify-between items-center p-4 border-b border-slate-100 bg-slate-50">
-          <h3 className="font-semibold text-lg">Manage Categories</h3>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-          >
-            <X size={20} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        aria-hidden
+      />
+      <div className="card relative z-10 w-full max-w-md animate-fade-in-up overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
+          <h3 className="text-base font-semibold text-white">Manage categories</h3>
+          <button onClick={onClose} className="icon-btn h-8 w-8">
+            <X size={18} />
           </button>
         </div>
 
         <div className="p-5">
-          <form onSubmit={handleAdd} className="flex gap-2 mb-4">
+          <form onSubmit={handleAdd} className="mb-4 flex gap-2">
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="New category name"
-              className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="input flex-1"
             />
             <button
               type="submit"
               disabled={adding || !newName.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-lg transition-colors"
+              className="btn-primary shrink-0"
             >
               {adding ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
               Add
@@ -154,11 +156,11 @@ export default function CategoryManager({
           </form>
 
           {categories.length === 0 ? (
-            <p className="text-sm text-slate-400 text-center py-6">
+            <p className="py-6 text-center text-sm text-slate-500">
               No categories yet. Add one above.
             </p>
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-white/5">
               {categories.map((category) => (
                 <CategoryRow key={category.id} category={category} />
               ))}
